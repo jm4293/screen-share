@@ -45,6 +45,19 @@ export class ChatGateway
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
+
+    // 연결된 클라이언트에게 환영 메시지 전송
+    client.emit('connected', {
+      socketId: client.id,
+      message: '서버에 성공적으로 연결되었습니다!',
+      timestamp: new Date(),
+    });
+
+    // 현재 온라인 사용자 수 전송
+    client.emit('connectionInfo', {
+      totalConnections: this.server.engine.clientsCount,
+      serverTime: new Date(),
+    });
   }
 
   handleDisconnect(client: Socket) {
@@ -172,3 +185,19 @@ export class ChatGateway
     return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
+
+// 1. 서버 시작
+//    ↓
+// 2. afterInit() 호출 ✨ (서버 초기화 완료)
+//    ↓
+// 3. 클라이언트A 연결
+//    ↓
+// 4. handleConnection(clientA) 호출 ✨
+//    ↓
+// 5. 클라이언트B 연결
+//    ↓
+// 6. handleConnection(clientB) 호출 ✨
+//    ↓
+// 7. 클라이언트A 연결 해제
+//    ↓
+// 8. handleDisconnect(clientA) 호출 ✨

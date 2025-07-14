@@ -45,6 +45,7 @@ const useSocket = () => {
 
     // 이벤트 리스너 설정
     globalSocket.on("connect", () => {
+      console.log("✅ 서버에 연결됨:", globalSocket?.id);
       socketInitialized = true;
       setSocket(globalSocket);
 
@@ -54,7 +55,18 @@ const useSocket = () => {
       }, 100);
     });
 
+    // 서버에서 보내는 연결 확인 메시지
+    globalSocket.on("connected", (data: { socketId: string; message: string; timestamp: Date }) => {
+      console.log("🎉 서버 연결 확인:", data);
+    });
+
+    // 서버에서 보내는 연결 정보
+    globalSocket.on("connectionInfo", (data: { totalConnections: number; serverTime: Date }) => {
+      console.log("📊 연결 정보:", data);
+    });
+
     globalSocket.on("disconnect", () => {
+      console.log("❌ 서버 연결 해제");
       socketInitialized = false;
     });
 

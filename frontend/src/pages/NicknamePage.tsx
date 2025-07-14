@@ -5,8 +5,8 @@ function NicknamePage() {
   const navigate = useNavigate();
 
   const handleNicknameSubmit = (nickname: string) => {
-    // 닉네임을 localStorage에 저장하여 다른 페이지에서 사용할 수 있게 함
-    localStorage.setItem("nickname", nickname);
+    // 닉네임을 sessionStorage에 저장하여 다른 페이지에서 사용할 수 있게 함
+    sessionStorage.setItem("nickname", nickname);
     navigate("/chat");
   };
 

@@ -42,7 +42,13 @@ const ChatRoom = (props: IProps) => {
       joinChat(nickname);
       joinedRef.current = true;
     }
-  }, [nickname]);
+
+    return () => {
+      if (joinedRef.current) {
+        disconnect();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

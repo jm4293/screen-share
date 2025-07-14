@@ -8,7 +8,7 @@ function ChatPage() {
   const [nickname, setNickname] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedNickname = localStorage.getItem("nickname");
+    const storedNickname = sessionStorage.getItem("nickname");
 
     if (!storedNickname) {
       navigate("/");
@@ -18,8 +18,8 @@ function ChatPage() {
   }, []);
 
   const handleLogout = () => {
-    // localStorage에서 닉네임 제거
-    localStorage.removeItem("nickname");
+    // sessionStorage에서 닉네임 제거
+    sessionStorage.removeItem("nickname");
     navigate("/");
   };
 

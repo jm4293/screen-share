@@ -45,7 +45,6 @@ const useSocket = () => {
 
     // 이벤트 리스너 설정
     globalSocket.on("connect", () => {
-      console.log("Connected to server:", globalSocket?.id);
       socketInitialized = true;
       setSocket(globalSocket);
 
@@ -56,43 +55,36 @@ const useSocket = () => {
     });
 
     globalSocket.on("disconnect", () => {
-      console.log("Disconnected from server");
       socketInitialized = false;
     });
 
     // 사용자가 채팅방에 참가했을 때
     globalSocket.on("userJoined", (data: { userId: string; nickname: string; userCount: number }) => {
-      console.log("User joined:", data);
       setOnlineUsers(data.userCount);
     });
 
     // 새 사용자가 들어왔을 때
     globalSocket.on("newUser", (data: { userId: string; nickname: string; userCount: number }) => {
-      console.log("New user joined:", data);
       setOnlineUsers(data.userCount);
     });
 
     // 사용자가 나갔을 때
     globalSocket.on("userLeft", (data: { userId: string; nickname: string; userCount: number }) => {
-      console.log("User left:", data);
       setOnlineUsers(data.userCount);
     });
 
     // 메시지 히스토리 받기
     globalSocket.on("messageHistory", (history: ChatMessage[]) => {
-      console.log("Message history received:", history);
       setMessages(history);
     });
 
     // 새 메시지 받기
     globalSocket.on("newMessage", (message: ChatMessage) => {
-      console.log("New message received:", message);
       setMessages((prev) => [...prev, message]);
     });
 
     // 온라인 사용자 목록
     globalSocket.on("onlineUsers", (data: { users: User[]; userCount: number }) => {
-      console.log("Online users:", data);
       setOnlineUsers(data.userCount);
     });
 
@@ -102,27 +94,23 @@ const useSocket = () => {
     });
 
     setSocket(globalSocket);
+
     return globalSocket;
   }, []);
 
   const joinChat = useCallback(
     (nickname: string) => {
       const currentSocket = globalSocket || initializeSocket();
-      console.log("joinChat called:", {
-        nickname,
-        hasSocket: !!currentSocket,
-        isConnected: currentSocket?.connected,
-        socketId: currentSocket?.id,
-      });
 
       if (currentSocket && currentSocket.connected) {
-        console.log("Emitting joinChat with nickname:", nickname);
         currentSocket.emit("joinChat", { nickname });
       } else {
-        console.log("joinChat conditions not met:", {
-          hasSocket: !!currentSocket,
-          isConnected: currentSocket?.connected,
-        });
+        // 소켓이 연결되지 않은 경우 재시도 로직
+        if (currentSocket && !currentSocket.connected) {
+          currentSocket.on("connect", () => {
+            currentSocket.emit("joinChat", { nickname });
+          });
+        }
       }
     },
     [initializeSocket]

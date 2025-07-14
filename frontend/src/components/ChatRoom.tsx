@@ -2,42 +2,20 @@ import React, { useState, useEffect, useRef } from "react";
 import useSocket from "../hooks/useSocket";
 import "./ChatRoom.css";
 
-interface ChatRoomProps {
+interface IProps {
   nickname: string;
   onLeave: () => void;
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ nickname, onLeave }) => {
+const ChatRoom = (props: IProps) => {
+  const { nickname, onLeave } = props;
+
   const { socket, onlineUsers, messages, joinChat, sendMessage, disconnect } = useSocket();
-  const [inputMessage, setInputMessage] = useState("");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const joinedRef = useRef(false);
 
-  useEffect(() => {
-    console.log("ChatRoom useEffect triggered:", {
-      nickname,
-      socketConnected: socket?.connected,
-      hasJoinedRef: joinedRef.current,
-      socketId: socket?.id,
-    });
-
-    // 닉네임이 있고, 소켓이 연결되었으며, 아직 조인하지 않았을 때만 조인
-    if (nickname && socket?.connected && !joinedRef.current) {
-      console.log("All conditions met - joining chat with nickname:", nickname);
-      joinChat(nickname);
-      joinedRef.current = true;
-    } else {
-      console.log("Conditions not met for joining:", {
-        hasNickname: !!nickname,
-        socketConnected: socket?.connected,
-        alreadyJoined: joinedRef.current,
-      });
-    }
-  }, [nickname, socket?.connected]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const [inputMessage, setInputMessage] = useState("");
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && socket && socket.connected) {
@@ -59,15 +37,16 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ nickname, onLeave }) => {
     onLeave();
   };
 
-  const handleTestJoin = () => {
-    console.log("Manual join test");
-    joinChat(nickname);
-  };
+  useEffect(() => {
+    if (nickname) {
+      joinChat(nickname);
+      joinedRef.current = true;
+    }
+  }, [nickname]);
 
-  const handleTestMessage = () => {
-    console.log("Manual message test");
-    sendMessage(nickname, "테스트 메시지");
-  };
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="chat-room">
@@ -76,12 +55,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ nickname, onLeave }) => {
         <div className="header-info">
           <span className="online-count">접속자: {onlineUsers}명</span>
           <span className="nickname">닉네임: {nickname}</span>
-          <button onClick={handleTestJoin} style={{marginRight: '5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px'}}>
-            조인
-          </button>
-          <button onClick={handleTestMessage} style={{marginRight: '5px', backgroundColor: '#2196F3', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px'}}>
-            테스트 메시지
-          </button>
           <button onClick={handleLeave} className="leave-button">
             나가기
           </button>

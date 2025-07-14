@@ -4,18 +4,18 @@ import ChatRoom from "../components/ChatRoom";
 
 function ChatPage() {
   const navigate = useNavigate();
+
   const [nickname, setNickname] = useState<string | null>(null);
 
   useEffect(() => {
-    // localStorage에서 닉네임을 가져옴
     const storedNickname = localStorage.getItem("nickname");
+
     if (!storedNickname) {
-      // 닉네임이 없으면 메인 페이지로 리다이렉트
       navigate("/");
     } else {
       setNickname(storedNickname);
     }
-  }, [navigate]);
+  }, []);
 
   const handleLogout = () => {
     // localStorage에서 닉네임 제거

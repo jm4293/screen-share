@@ -1,30 +1,38 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ChatRoom from "../components/ChatRoom";
+import PrivateChat from "../components/PrivateChat";
 
 function ChatPage() {
   const navigate = useNavigate();
 
   const [nickname, setNickname] = useState<string | null>(null);
+  const [targetUserId, setTargetUserId] = useState<string | null>(null);
+  const [targetNickname, setTargetNickname] = useState<string | null>(null);
 
   useEffect(() => {
     const storedNickname = sessionStorage.getItem("nickname");
+    const storedTargetUserId = sessionStorage.getItem("targetUserId");
+    const storedTargetNickname = sessionStorage.getItem("targetNickname");
 
-    if (!storedNickname) {
-      navigate("/");
+    if (!storedNickname || !storedTargetUserId || !storedTargetNickname) {
+      navigate("/users");
     } else {
       setNickname(storedNickname);
+      setTargetUserId(storedTargetUserId);
+      setTargetNickname(storedTargetNickname);
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
-    // sessionStorage에서 닉네임 제거
+    // sessionStorage에서 모든 정보 제거
     sessionStorage.removeItem("nickname");
+    sessionStorage.removeItem("targetUserId");
+    sessionStorage.removeItem("targetNickname");
     navigate("/");
   };
 
-  // 닉네임이 로드되지 않았으면 로딩 표시
-  if (!nickname) {
+  // 필요한 정보가 로드되지 않았으면 로딩 표시
+  if (!nickname || !targetUserId || !targetNickname) {
     return (
       <div
         style={{
@@ -40,7 +48,14 @@ function ChatPage() {
     );
   }
 
-  return <ChatRoom nickname={nickname} onLeave={handleLogout} />;
+  return (
+    <PrivateChat
+      nickname={nickname}
+      targetUserId={targetUserId}
+      targetNickname={targetNickname}
+      onLeave={handleLogout}
+    />
+  );
 }
 
 export default ChatPage;

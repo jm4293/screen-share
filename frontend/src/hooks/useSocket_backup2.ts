@@ -14,7 +14,7 @@ interface ChatMessage {
 interface User {
   id: string;
   nickname: string;
-  status: "online" | "chatting";
+  status: 'online' | 'chatting';
 }
 
 const useSocket = () => {
@@ -75,51 +75,42 @@ const useSocket = () => {
   }, [socket]);
 
   // 로비 입장 (닉네임 입력 후)
-  const joinLobby = useCallback(
-    (nickname: string) => {
-      const currentSocket = socket || initializeSocket();
-
-      const attemptJoin = () => {
-        if (currentSocket && currentSocket.connected) {
-          console.log("🚪 로비 입장:", nickname);
-          currentSocket.emit("joinLobby", { nickname });
-        }
-      };
-
-      if (currentSocket) {
-        if (currentSocket.connected) {
-          attemptJoin();
-        } else {
-          // 연결이 안 되어 있으면 연결 완료를 기다림
-          currentSocket.once("connect", attemptJoin);
-        }
+  const joinLobby = useCallback((nickname: string) => {
+    const currentSocket = socket || initializeSocket();
+    
+    const attemptJoin = () => {
+      if (currentSocket && currentSocket.connected) {
+        console.log("🚪 로비 입장:", nickname);
+        currentSocket.emit("joinLobby", { nickname });
       }
-    },
-    [socket, initializeSocket]
-  );
+    };
+
+    if (currentSocket) {
+      if (currentSocket.connected) {
+        attemptJoin();
+      } else {
+        // 연결이 안 되어 있으면 연결 완료를 기다림
+        currentSocket.once("connect", attemptJoin);
+      }
+    }
+  }, [socket, initializeSocket]);
 
   // 1:1 채팅 메시지 전송
-  const sendPrivateMessage = useCallback(
-    (targetUserId: string, message: string) => {
-      if (socket && socket.connected) {
-        console.log("💌 1:1 메시지 전송:", { targetUserId, message });
-        socket.emit("sendPrivateMessage", { targetUserId, message });
-      }
-    },
-    [socket]
-  );
+  const sendPrivateMessage = useCallback((targetUserId: string, message: string) => {
+    if (socket && socket.connected) {
+      console.log("💌 1:1 메시지 전송:", { targetUserId, message });
+      socket.emit("sendPrivateMessage", { targetUserId, message });
+    }
+  }, [socket]);
 
   // 1:1 채팅 나가기
-  const leavePrivateChat = useCallback(
-    (targetUserId: string) => {
-      if (socket && socket.connected) {
-        console.log("👋 1:1 채팅 나가기:", targetUserId);
-        socket.emit("leavePrivateChat", { targetUserId });
-        setPrivateMessages([]); // 메시지 초기화
-      }
-    },
-    [socket]
-  );
+  const leavePrivateChat = useCallback((targetUserId: string) => {
+    if (socket && socket.connected) {
+      console.log("👋 1:1 채팅 나가기:", targetUserId);
+      socket.emit("leavePrivateChat", { targetUserId });
+      setPrivateMessages([]); // 메시지 초기화
+    }
+  }, [socket]);
 
   // 연결 해제
   const disconnect = useCallback(() => {
